@@ -119,6 +119,7 @@ def _submit_job(job_submitter, command, job_parms, waitfor_id=None, hold=False, 
 
 
 def startAlignment(read_tuple, ref_filename, out_dir, job_manager):
+    #create a job for each read1-read2 file pair that puts these reads into memory
     job_params = {'queue':'', 'mem_requested':8, 'num_cpus':2, 'walltime':24, 'args':''}
     #read_tuple[0] is sample name
     job_params['name'] = "retrieveReads_%s" % read_tuple[0]
@@ -130,4 +131,5 @@ def startAlignment(read_tuple, ref_filename, out_dir, job_manager):
         read2 = ''
     command = "python /scratch/zkoch/amplicon_aligner/aligner.py -s %s -r1 %s -r2 %s -f %s -o %s -j %s" % (read_tuple[0], read1, read2, ref_filename, out_dir, job_manager)
     jobid = _submit_job(job_manager, command, job_params)
+    
     return jobid
