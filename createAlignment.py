@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 import argparse
 import logging
 
@@ -94,13 +95,16 @@ def main():
         optional_group = parser.add_argument_group("optional arguments")
         optional_group.add_argument("-o", "--out-dir", dest="odir", metavar="DIR", help="directory to write output files to. [default: `pwd`]")
         optional_group.add_argument("-j", "--job_manager", dest="job_manager", default="SLURM", help="cluster job submitter to use (PBS, SLURM, SGE, none). [default: SLURM]")
+        alignment_group = parser.add_argument_group("optional alignment arguments")
+        alignment_group.add_argument("--hash-length" , dest="hash_length", required=False, type=int, default=5, help="reference subsequence length [default: 5]")
         #parse arguments
         args = parser.parse_args()
-        run_name = args.name
+        program_name = args.name
         ref_filename = expandPath(args.fasta.name)
         read_dir = args.rdir
         out_dir = args.odir
         job_manager = args.job_manager
+        hash_length = args.hash_length
         #make out_dir and read_dir current directory if not speicified
         if not out_dir:
             out_dir = expandPath(os.getcwd())
@@ -125,13 +129,13 @@ def main():
                             datefmt='%m/%d/%Y %H:%M:%S',
                             filename=logfile,
                             filemode='w')
-        logging.info("Aligning reads in %s to refs in fasta file: %s for run: %s" % (read_dir, ref_filename, run_name))
+        logging.info("Aligning reads in %s to refs in fasta file: %s for run: %s" % (read_dir, ref_filename, program_name))
         #get reads into a list of read_tuples
         read_list = findReads(read_dir)
 
         #align the reads to references
         for read_tuple in read_list:
-            dispatcher.startAlignment(read_tuple, ref_filename, out_dir, job_manager)
+            dispatcher.startAlignment(read_tuple, ref_filename, out_dir, job_manager, hash_length)
         #aligner.align(read_list, references)
 
         return 0
